@@ -59,15 +59,23 @@ namespace dreamMachine {
      * Gets the pods
      */
     export function pods(): Pod[] {
-        if (_pods) {
+        if (!_pods) {
+            serial.setBaudRate(BAUD_RATE);
             _pods = [
                 new Pod(0),
                 new Pod(1),
                 new Pod(2),
                 new Pod(3)
             ]
+            setInterval(updatePods, PAUSE_PER_UPDATE)
         }
         return _pods;
+    }
+
+    function updatePods() {
+        for(const pod of pods()) {
+            pod.update();
+        }
     }
 }
 
