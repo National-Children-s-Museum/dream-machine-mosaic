@@ -13,6 +13,9 @@
     "testFiles": [
         "test.ts"
     ],
+    "testDependencies": {
+        "circuit-playground": "*"
+    },
     "public": true,
     "supportedTargets": [
         "adafruit",
