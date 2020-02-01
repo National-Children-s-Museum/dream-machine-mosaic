@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "description": "",
     "dependencies": {
-        "circuit-playground": "*",
+        "core": "*",
         "serial": "*"
     },
     "files": [
@@ -15,7 +15,9 @@
     ],
     "public": true,
     "supportedTargets": [
-        "adafruit"
+        "adafruit",
+        "arcade",
+        "maker"
     ],
     "preferredEditor": "tsprj"
 }
