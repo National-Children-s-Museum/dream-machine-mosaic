@@ -110,6 +110,6 @@ namespace dreamMachine {
 
     // init system
     serial.setBaudRate(BAUD_RATE);
-    setInterval(Pod.updatePods, PAUSE_PER_UPDATE)
+    setInterval(function () { Pod.updatePods() }, PAUSE_PER_UPDATE)
 }
 

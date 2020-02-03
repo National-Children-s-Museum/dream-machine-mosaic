@@ -3,9 +3,8 @@ const colors = [
     0x00ffff,
     0x0000ff
 ]
-for(const pod of dreamMachine.pods()) {
-    for(const color of colors) {
-        pod.color = color;
-    }
-    pause(1000)
-} 
+control.runInBackground(function () {
+    dreamMachine.pod0.setColor(0xff0000)
+    dreamMachine.pod1.setColor(0x00ff00)
+    dreamMachine.pod1.setColor(0x0000ff)
+})
