@@ -1,5 +1,5 @@
 /**
- * Functions to talk to the Dream Machine
+ * Control the colors of the Dream Machine
  */
 //% weight=100 icon="\uf0eb"
 namespace dreamMachine {
