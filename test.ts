@@ -1,10 +1,10 @@
-const colors = [
-    0xff0000,
-    0x00ffff,
-    0x0000ff
-]
+dreamMachine.debug = true;
+game.consoleOverlay.setVisible(true)
+console.log(`mosaic test`)
 control.runInBackground(function () {
-    dreamMachine.pod0.setColor(0xff0000)
-    dreamMachine.pod1.setColor(0x00ff00)
-    dreamMachine.pod1.setColor(0x0000ff)
+   dreamMachine.setUpdateInterval(100000)
+    dreamMachine.pod0.setColor(0x203040)
+    dreamMachine.pod0.setBrightness(0x50)
+    dreamMachine.pod1.setColor(0x506070)
+    dreamMachine.pod1.setBrightness(0x70)
 })

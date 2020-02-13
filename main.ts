@@ -3,9 +3,10 @@
  */
 //% weight=100 icon="\uf0eb"
 namespace dreamMachine {
-    const PAUSE_PER_BYTE = 5
-    const PAUSE_PER_UPDATE = 1000
+    const PAUSE_PER_BYTE = 40
     const BAUD_RATE = BaudRate.BaudRate9600
+    let interval: number = 1000
+    export let debug = false;
 
     enum Channel {
         Intensity,
@@ -37,18 +38,32 @@ namespace dreamMachine {
 
         constructor(index: number) {
             this.index = index;
-            this._brightness = 0xf0;
-            this._color = 0xf000f0;
+            this._brightness = 0;
+            this._color = 0;
 
             // record in list of pods
             Pod.pods.push(this);
         }
 
         private update() {
-            this.sendByte(this.encode(Channel.Intensity, this._brightness & 0xff));
-            this.sendByte(this.encode(Channel.Red, this._color & 0xff));
-            this.sendByte(this.encode(Channel.Green, (this._color >> 8) & 0xff));
-            this.sendByte(this.encode(Channel.Blue, (this._color >> 16) & 0xff));
+            if (debug)
+                console.log(`pod ${this.index} c ${Pod.toHex(this._color)} b ${Pod.toHex(this._brightness)}`)
+            this.sendByte(this._brightness & 0xff, this.encode(Channel.Intensity, this._brightness & 0x70));
+            this.sendByte(this._color & 0xff, this.encode(Channel.Red, (this._color >> 16) & 0x70));
+            this.sendByte((this._color >> 8) & 0xff, this.encode(Channel.Green, (this._color >> 8) & 0x70));
+            this.sendByte((this._color >> 16) & 0xff, this.encode(Channel.Blue, this._color & 0x70));
+        }
+
+        private static toHex(n: number) {
+            if (n < 0xff) {
+                const b = control.createBuffer(1);
+                b[0] = n
+                return b.toHex();
+            } else {
+                const b = control.createBuffer(4);
+                b.setNumber(NumberFormat.UInt32LE, 0, n)
+                return b.toHex();
+            }
         }
 
         private encode(channel: number, value: number) {
@@ -58,10 +73,12 @@ namespace dreamMachine {
             return c;
         }
 
-        private sendByte(b: number) {
-            const code = ~(b << 1);
+        private sendByte(value: number, encoded: number) {
+            const code = ~(encoded << 1);
             const buf = control.createBuffer(1)
             buf.setUint8(0, code)
+            if (debug)
+                console.log(`${value}:${Pod.toHex(value)} > ${encoded}:${Pod.toHex(encoded)} > ${buf.toHex()}`)
             serial.writeBuffer(buf)
             pause(PAUSE_PER_BYTE)
         }
@@ -74,7 +91,7 @@ namespace dreamMachine {
         //% blockId=dmpodsetbrightness
         //% block="set pod %pod brightness to %brightness"
         setBrightness(brightness: number) {
-            this._brightness = brightness | 0;
+            this._brightness = brightness;
         }
 
         /**
@@ -83,7 +100,9 @@ namespace dreamMachine {
         //% blockId=dmpodsetcolor
         //% block="set pod %pod color to %brightness"
         setColor(color: number) {
-            this._color = color | 0;
+            this._color = color;
+            if (debug)
+                console.log(`pod ${this.index} c ${Pod.toHex(this._color)}`)
         }
     }
 
@@ -108,8 +127,20 @@ namespace dreamMachine {
     //% fixedInstance whenUsed block="pod 3"
     export const pod3 = new Pod(3);
 
+    /**
+     * Sets the update interval in milliseconds
+     */
+    export function setUpdateInterval(millis: number) {
+        interval = Math.max(500, millis | 0)
+    }
+
     // init system
     serial.setBaudRate(BAUD_RATE);
-    setInterval(function () { Pod.updatePods() }, PAUSE_PER_UPDATE)
+    control.runInBackground(function() {
+        while(true) {
+            Pod.updatePods();
+            pause(interval);
+        }
+    })
 }
 
